@@ -1,7 +1,17 @@
 <script>
+    import TodoItem from "../../components/TodoItem.svelte";
+import { db } from "../../lib/firebase/firebase"
+	import { authHandlers, authStore } from "../../store/store";
+    import { getDoc, doc, setDoc } from 'firebase/firestore';
+
+
     let todoList = ['Do the groceries'];
     let currTodo = '';
     let error = false;
+
+    authStore.subscribe(curr => {
+        todoList = curr.data.todos;
+    });
 
     function addTodo() {
         error = false;
@@ -28,59 +38,54 @@
         });
         todoList = newTodoList;
     }
+
+    async function saveTodos() {
+        try {
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            await setDoc(
+                userRef, 
+                {
+                    todos: todoList,
+                }, 
+                {merge: true}
+            );
+        } catch(err) {
+            console.log("There was an error saving your information", err)
+        }
+    }
 </script>
 
-<div class="mainContainer">
-    <div class="headerContainer">
-        <h1>Todo List</h1>
-        <div class="headerBtns">
-            <button>
-                <i class="fa-regular fa-floppy-disk" />
-                <p>Save</p>
-            </button>
-            <button>
-                <i class="fa-solid fa-right-from-bracket" />
-                <p>Logout</p>
-            </button>
+{#if !$authStore.loading}
+    <div class="mainContainer">
+        <div class="headerContainer">
+            <h1>Todo List</h1>
+            <div class="headerBtns">
+                <button on:click={saveTodos}>
+                    <i class="fa-regular fa-floppy-disk" />
+                    <p>Save</p>
+                </button>
+                <button on:click={authHandlers.logout}>
+                    <i class="fa-solid fa-right-from-bracket" />
+                    <p>Logout</p>
+                </button>
+            </div>
+        </div>
+        <main>
+            {#if todoList.length === 0}
+                <p>
+                    You have nothing todo!
+                </p>
+            {/if}
+            {#each todoList as todo, index} 
+                <TodoItem {todo} {index} {removeTodo} {editTodo} />
+            {/each}
+        </main>
+        <div class={"enterTodo " + (error ? "errorBorder" : "")}>
+            <input bind:value={currTodo} type="text" placeholder="Enter todo"/>
+            <button on:click={addTodo}>ADD</button>
         </div>
     </div>
-    <main>
-        {#if todoList.length === 0}
-            <p>
-                You have nothing todo!
-            </p>
-        {/if}
-        {#each todoList as todo, index} 
-            <div class="todo">
-                <p>
-                    {index + 1}. {todo}
-                </p>
-                <div class="actions">
-                    <!-- svelte-ignore a11y-no-static-element-interactions -->
-                    <i 
-                        on:click={() => { 
-                            editTodo(index)
-                        }} 
-                        on:keydown={() => {}} 
-                        class="fa-solid fa-pen-to-square"
-                    />
-                    <!-- svelte-ignore a11y-no-static-element-interactions -->
-                    <i
-                        on:click={() => { 
-                            removeTodo(index)
-                        }} 
-                        on:keydown={() => {}}  
-                        class="fa-regular fa-trash-can" 
-                    />
-                </div>
-            </div>
-        {/each}
-    </main>
-    <div class={"enterTodo " + (error ? "errorBorder" : "")}>
-        <input bind:value={currTodo} type="text" placeholder="Enter todo"/>
-        <button on:click={addTodo}>ADD</button>
-    </div>
-</div>
+{/if}
 
 <style>
     .mainContainer {
@@ -134,28 +139,7 @@
         flex: 1;
     }
 
-    .todo {
-        border-left: 1px solid cyan;
-        padding: 8px 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .actions {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        font-size: 1.3rem;
-    }
-
-    .actions i {
-        cursor: pointer; 
-    }
     
-    .actions i:hover {
-        color: coral;
-    }
 
     .enterTodo {
         display: flex;
