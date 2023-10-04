@@ -4,7 +4,7 @@
 	import { getDoc, doc, setDoc } from 'firebase/firestore';
     import { authStore } from '../store/store';
 
-    const nonAuthRoutes = ['/', 'product']
+    const nonAuthRoutes = ['/', '/authenticate', '/about', 'product']
 
     onMount(() => {
         console.log("Mounting");
@@ -16,7 +16,7 @@
                 return;
             }
 
-            if (user && currentPath === "/") {
+            if (user && currentPath === "/authenticate") {
                 window.location.href = "/dashboard";
                 return;
             }
@@ -53,8 +53,17 @@
 </script>
 
 <div class="mainContainer">
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/authenticate">login</a></li>
+        </ul>
+    </nav>
     <slot />
 </div>
+
 
 <style>
     .mainContainer {
@@ -64,5 +73,31 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        padding: 20px; 
+    }
+
+    nav {
+        margin-bottom: 20px; 
+    }
+
+    ul {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+    }
+
+    li {
+        font-size: 1.2rem;
+    }
+
+    a {
+        text-decoration: none;
+        color: white;
+        transition: 0.3s ease; 
+    }
+
+    a:hover {
+        color: cyan;
     }
 </style>
+
