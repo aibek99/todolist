@@ -14,19 +14,20 @@
         }
         if (!email || !password || (register && !confirmPass)) {
             error = true;
-            return;
+            return; 
         }
         authenticating = true;
 
         try {
             if (!register) {
-                await authHandlers.login(email, password);
+                await authHandlers.login(email, password, true);
             } else {
-                await authHandlers.signup(email, password);
+                await authHandlers.signup(email, password, true);
             }
         } catch (err) {
             console.log("There was an auth error", err);
             error = true;
+            authenticating = false;
         }
     }
 

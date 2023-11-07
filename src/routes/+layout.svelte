@@ -2,9 +2,15 @@
     import {onMount} from 'svelte'
     import {auth, db} from '../lib/firebase/firebase'
 	import { getDoc, doc, setDoc } from 'firebase/firestore';
-    import { authStore } from '../store/store';
+    import { authStore, authHandlers } from '../store/store';
+
+    let loggedIn = false;
 
     const nonAuthRoutes = ['/', '/authenticate', '/about', 'product']
+
+    authStore.subscribe(async store => {
+        loggedIn = store.signedIn;
+    });
 
     onMount(() => {
         console.log("Mounting");
@@ -13,11 +19,6 @@
 
             if (!user && !nonAuthRoutes.includes(currentPath)) {
                 window.location.href = "/";
-                return;
-            }
-
-            if (user && currentPath === "/authenticate") {
-                window.location.href = "/dashboard";
                 return;
             }
 
@@ -33,11 +34,11 @@
                 const userRef = doc(db, 'user', user.uid);
                 dataToSetToStore = {
                     email:  user.email,
-                    todos: [],
+                    assignments: [],
                 }
                 await setDoc(userRef, dataToSetToStore, { merge: true })
             } else {
-                const userData = docSnap.data()
+                const userData = docSnap.data();
                 dataToSetToStore = userData;
             }
             authStore.update(curr => {
@@ -46,8 +47,14 @@
                     user,
                     data: dataToSetToStore,
                     loading: false,
+                    signedIn: true
                 };
             })
+
+            if (loggedIn && currentPath === "/authenticate") {
+                window.location.href = "/assignment";
+                return;
+            }
         })
     })
 </script>
@@ -56,9 +63,20 @@
     <nav>
         <ul>
             <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/authenticate">login</a></li>
+            {#if loggedIn}
+                <li><a href="/assignment">Assignment</a></li>
+                <li><a href="/classes">Classes</a></li>
+                <li><a href="/about">About</a></li>
+                <li>
+                    <a href="/" on:click={authHandlers.logout}>
+                        <i class="fa-solid fa-right-from-bracket" /> Logout
+                    </a>
+                </li>
+                
+            {:else}
+                <li><a href="/about">About</a></li>
+                <li><a href="/authenticate">Login</a></li>
+            {/if}
         </ul>
     </nav>
     <slot />
@@ -77,17 +95,21 @@
     }
 
     nav {
-        margin-bottom: 20px; 
+        margin-bottom: 40px; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     ul {
         list-style: none;
         display: flex;
-        gap: 20px;
+        position: relative;
+        gap: 25px;
     }
 
     li {
-        font-size: 1.2rem;
+        font-size: 2rem;
     }
 
     a {

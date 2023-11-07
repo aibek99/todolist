@@ -9,7 +9,7 @@
 
         <p>I used the latest technologies to implement this project, including SvelteKit with TypeScript, ESLint, and Prettier for the frontend, and ***** for the backend. This ensures that website is not only user->
 
-        <p>In conclusion, Assignment tool is designed to make it easy for you to manage your assignments. With simple CMS, you can keep track of your assignments, update your schedule, and manage your todos with eas>
+        <p>In conclusion, Assignment tool is designed to make it easy for you to manage your assignments. With simple CMS, you can keep track of your assignments, update your schedule, and manage your assignments with eas>
     </div>
 </body>
 
