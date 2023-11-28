@@ -10,143 +10,163 @@
             assignment: 'What to do',
             assignmentDetails: 'Additional details',
             courseId: 'Course ID',
-            courseName: 'Course Name',
+            // courseName: 'Course Name',
             dueDate: 'yyyy-mm-dd',
             daysLeft: 'X days', // X is the number of days left until the deadline
             progress: 'X%', // X is the completion progress percentage
             completed: false,
-            courseLogo: 'path/to/course-logo.png'
+            // courseLogo: 'path/to/course-logo.png'
         }
     ];
-    let tmpAssignmentList = [];
-    let isTmpAssignmentList = false;
-    let currAssignment = {
-            assignment: '',
-            assignmentDetails: '',
-            courseId: '',
-            courseName: '',
-            dueDate: '',
-            daysLeft: '',
-            progress: '',
-            completed: false,
-            courseLogo: ''
-        };
-    let error = false;
-    let newAssignment = false;
+
+    let daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    let idsOfClasses = [];
+
+    let listOfClasses = [
+        {
+            courseId: 'Which course',
+            courseDescription: 'Additional details',
+            category: 'Category of the course',
+            scheduleDay: 'The days of the course',
+            period: 'Choose the period for your course',
+        }
+    ];
 
     authStore.subscribe(curr => {
         assignmentList = curr.data.assignments;
+        listOfClasses = curr.data.classes;
     });
 
+    let currAssignment = {
+        assignment: '',
+        assignmentDetails: '',
+        courseId: '',
+        // courseName: '',
+        dueDate: '',
+        daysLeft: '',
+        progress: '',
+        completed: false,
+        // courseLogo: ''
+    };
+
+    let newAssignment = false;
+    let error = false;
+
     function addAssignment() {
-        if (!validateText(currAssignment.assignment)) {
-            alert("Assignment field cannot be empty.");
-            return;
-        }
+        try {
+            if (!validateText(currAssignment.assignment)) {
+                alert("Assignment field cannot be empty.");
+                return;
+            }
 
-        if (!validateDate(currAssignment.dueDate)) {
-            alert("Invalid date format or date is history. Please use date later than today and in this format YYYY-MM-DD.");
-            return;
-        }
+            if (!validateDate(currAssignment.dueDate)) {
+                alert("Invalid date format or date is history. Please use date later than today and in this format YYYY-MM-DD.");
+                return;
+            }
 
-        if (!validateProgress(currAssignment.completed)) {
-            alert("Invalid value for Completed field.");
-            return;
-        }
+            if (!validateProgress(currAssignment.completed)) {
+                alert("Invalid value for Completed field.");
+                return;
+            }
 
-        if (!validateURL(currAssignment.courseLogo)) {
-            alert("Invalid URL format for Course Logo.");
-            return;
+            // if (!validateURL(currAssignment.courseLogo)) {
+            //     alert("Invalid URL format for Course Logo.");
+            //     return;
+            // }
+            error = false;
+            if (!currAssignment) {
+                error = true;
+            }
+            assignmentList = [...assignmentList, {assignment: currAssignment.assignment,
+                assignmentDetails: currAssignment.assignmentDetails,
+                courseId: currAssignment.courseId,
+                // courseName: currAssignment.courseName,
+                dueDate: currAssignment.dueDate,
+                daysLeft: currAssignment.daysLeft,
+                progress: currAssignment.progress,
+                completed: currAssignment.completed,
+                // courseLogo: currAssignment.courseLogo
+            }];
+            console.log(currAssignment);
+        } catch(err) {
+            console.log("There was an error adding your assignment", err);
         }
-        error = false;
-        if (!currAssignment) {
-            error = true;
-        }
-        assignmentList = [...assignmentList, {assignment: currAssignment.assignment,
-            assignmentDetails: currAssignment.assignmentDetails,
-            courseId: currAssignment.courseId,
-            courseName: currAssignment.courseName,
-            dueDate: currAssignment.dueDate,
-            daysLeft: currAssignment.daysLeft,
-            progress: currAssignment.progress,
-            completed: currAssignment.completed,
-            courseLogo: currAssignment.courseLogo}];
-        console.log('addAssignment ------>');
-        for (let i = 0; i < assignmentList.length; i++) {
-            const assignmentItem = assignmentList[i];
-            console.log('Assignment:', assignmentItem.assignment);
-            console.log('Details:', assignmentItem.assignmentDetails);
-            console.log('Course ID:', assignmentItem.courseId);
-            console.log('Course Name:', assignmentItem.courseName);
-            console.log('Due Date:', assignmentItem.dueDate);
-            console.log('Days Left:', assignmentItem.daysLeft);
-            console.log('Progress:', assignmentItem.progress);
-            console.log('Completed:', assignmentItem.completed);
-            console.log('Course Logo:', assignmentItem.courseLogo);
-            console.log('----------------------');
-        }
+    }
 
+    async function saveAssignment() {
+        try {
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            await setDoc(
+                userRef, 
+                {
+                    assignments: assignmentList,
+                }, 
+                {merge: true}
+            );
+        } catch(err) {
+            console.log("There was an error saving your information", err);
+        }
+    }
+
+    async function addAndSaveAssignment() {
+        addAssignment();
+        await saveAssignment();
+        createNewAssignment();
+    }
+
+    async function createNewAssignment() {
+        newAssignment = !newAssignment;
+        idsOfClasses = []
+        for (let i = 0; i < listOfClasses.length; i++) {
+            idsOfClasses = [...idsOfClasses, listOfClasses[i].courseId];
+        }
         currAssignment = {
             assignment: '',
             assignmentDetails: '',
             courseId: '',
-            courseName: '',
+            // courseName: '',
             dueDate: '',
             daysLeft: '',
-            progress: '', 
+            progress: '',
             completed: false,
-            courseLogo: ''
+            // courseLogo: ''
         };
     }
 
+    function filterAssignments(index) {
+        let newAssignmentList = assignmentList.filter((val, i) => {
+            console.log(i, index, i !== index);
+            return i !== index;
+        });
+        return newAssignmentList;
+    }
+
     function editAssignment(index) {
-        let newAssignmentList = assignmentList.filter((val, i) => {
-            console.log(i, index, i !== index);
-            return i !== index;
-        });
+        let filteredAssignments = filterAssignments(index);
         currAssignment = assignmentList[index];
-        isTmpAssignmentList = true;
-        tmpAssignmentList = assignmentList;
-        assignmentList = newAssignmentList;
-        createNewAssignment();
+        assignmentList = filteredAssignments;
+        newAssignment = !newAssignment; // createNewAssignment()
     }
 
-    function cancelEditAssignment() {
-        assignmentList = tmpAssignmentList;
-        tmpAssignmentList = [];
-        isTmpAssignmentList = false;
-        createNewAssignment();
-    }
-
-    function removeAssignment(index) {
-        let newAssignmentList = assignmentList.filter((val, i) => {
-            console.log(i, index, i !== index);
-            return i !== index;
-        });
-        assignmentList = newAssignmentList;
-    }
-    
-    async function createNewAssignment() {
-        newAssignment = !newAssignment;
-    }
-
-    async function saveAssignments() {
+    async function cancelEditAssignment() {
         try {
             const userRef = doc(db, 'users', $authStore.user.uid);
-            console.log('saveAssignments ------>');
-            for (let i = 0; i < assignmentList.length; i++) {
-                const assignmentItem = assignmentList[i];
-                console.log('Assignment:', assignmentItem.assignment);
-                console.log('Details:', assignmentItem.assignmentDetails);
-                console.log('Course ID:', assignmentItem.courseId);
-                console.log('Course Name:', assignmentItem.courseName);
-                console.log('Due Date:', assignmentItem.dueDate);
-                console.log('Days Left:', assignmentItem.daysLeft);
-                console.log('Progress:', assignmentItem.progress);
-                console.log('Completed:', assignmentItem.completed);
-                console.log('Course Logo:', assignmentItem.courseLogo);
-                console.log('----------------------');
+            const userDoc = await getDoc(userRef);
+            
+            if (userDoc.exists()) {
+                assignmentList = userDoc.data().assignments;
             }
+            createNewAssignment();
+        } catch(err) {
+            console.log("There was an error in cancelling editing", err);
+        }
+    }
+
+    async function removeAssignment(index) {
+        try {
+            let filteredAssignments = filterAssignments(index);
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            assignmentList = filteredAssignments;
 
             await setDoc(
                 userRef, 
@@ -155,17 +175,9 @@
                 }, 
                 {merge: true}
             );
-            isTmpAssignmentList = false;
-            tmpAssignmentList = [];
         } catch(err) {
-            console.log("There was an error saving your information", err)
+            console.log("There was an error removing your information", err);
         }
-        createNewAssignment();
-    }
-
-    function addAndSaveAssignment() {
-        addAssignment();
-        saveAssignments();
     }
 
     function validateText(value) {
@@ -177,7 +189,7 @@
         if (!regex.test(value)) {
             return false; // Invalid date format
         }
-
+ 
         const inputDate = new Date(value);
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Set hours, minutes, seconds, and milliseconds to 0 for accurate comparison
@@ -246,12 +258,19 @@
                 <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
                     <input bind:value={currAssignment.assignmentDetails} type="text" placeholder="Assignment's details"/>
                 </div>
-                <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
+                <!-- <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
                     <input bind:value={currAssignment.courseId} type="text" placeholder="Course ID"/>
-                </div>
+                </div> -->
                 <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
+                    <select bind:value={currAssignment.courseId} class="select-progress">
+                        {#each idsOfClasses as courseId}
+                            <option value={courseId}>{courseId}</option>
+                        {/each}
+                    </select>
+                </div>                
+                <!-- <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
                     <input bind:value={currAssignment.courseName} type="text" placeholder="Course Name"/>
-                </div>
+                </div> -->
                 <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
                     <input bind:value={currAssignment.dueDate} type="date" placeholder="Due Date"/>
                 </div>
@@ -273,9 +292,9 @@
                         <option value={true}>Completed</option>
                     </select>
                 </div>
-                <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
+                <!-- <div class={"enterAssignment " + (error ? "errorBorder" : "")}>
                     <input bind:value={currAssignment.courseLogo} type="text" placeholder="Course Logo URL"/>
-                </div>
+                </div> -->
             </div>
         {/if}
     </div>
