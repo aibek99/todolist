@@ -1,6 +1,27 @@
 <script>
     import ClassItem from "../../components/ClassItem.svelte";
-    import {authStore} from '../../store/store'
+    import {authHandlers, authStore} from '../../store/store'
+    import AssignmentItem from "../../components/AssignmentItem.svelte";
+    import { db } from "../../lib/firebase/firebase";
+	import { getDoc, doc, setDoc } from 'firebase/firestore';
+
+    
+    let assignmentList = [
+        {
+            assignment: 'What to do',
+            assignmentDetails: 'Additional details',
+            courseId: 'Course ID',
+            // courseName: 'Course Name',
+            dueDate: 'yyyy-mm-dd',
+            daysLeft: 'X days', // X is the number of days left until the deadline
+            progress: 'X%', // X is the completion progress percentage
+            completed: false,
+            // courseLogo: 'path/to/course-logo.png'
+        }
+    ];
+
+    let classAssignments = [];
+    let listClassAssignments = false;
 
     let daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -14,47 +35,70 @@
         }
     ];
 
+    authStore.subscribe(curr => {
+        assignmentList = curr.data.assignments;
+        listOfClasses = curr.data.classes;
+    });
+
     let currClass = {
-            courseId: '',
-            courseDescription: '',
-            category: '',
-            scheduleDay: [],
-            period: '',
-        };
+        courseId: '',
+        courseDescription: '',
+        category: '',
+        scheduleDay: [],
+        period: ''
+    };
     
     let newClass = false;
     let error = false;
 
     function addClass() {
-        if (!(currClass.scheduleDay.length > 0)) {
-            alert("Select the days when there will be classes on this subject.");
-            return;
-        }
-        if (!(currClass.courseId.trim().length > 0)) {
-            alert("Course ID can't be empty");
-            return;
-        }
-        error = false;
-        if (!currAssignment) {
-            error = true;
-        }
-        listOfClasses = [...listOfClasses, {courseId: currClass.courseId,
-            courseDescription: currClass.courseDescription,
-            category: currClass.category,
-            scheduleDay: currClass.scheduleDay,
-            period: currClass.period}];
+        try {
+            if (!(currClass.scheduleDay.length > 0)) {
+                alert("Select the days when there will be classes on this subject.");
+                return;
+            }
+            if (!(currClass.courseId.trim().length > 0)) {
+                alert("Course ID can't be empty");
+                return;
+            }
+            error = false;
+            if (!currClass) {
+                error = true;
+            }
 
-        console.log('addClass ------>');
-        for (let i = 0; i < listOfClasses.length; i++) {
-            const classItem = listOfClasses[i];
-            console.log('courseId:', classItem.courseId);
-            console.log('course description:', classItem.courseDescription);
-            console.log('category:', classItem.category);
-            console.log('schedule days:', classItem.scheduleDay);
-            console.log('period:', classItem.period);
-            console.log('----------------------');
+            listOfClasses = [...listOfClasses, {courseId: currClass.courseId,
+                courseDescription: currClass.courseDescription,
+                category: currClass.category,
+                scheduleDay: currClass.scheduleDay,
+                period: currClass.period}];
+        } catch(err) {
+            console.log("There was an error adding your information", err);
         }
+    }
 
+    async function saveClass() {
+        try {
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            await setDoc(
+                userRef,
+                {
+                    classes: listOfClasses,
+                }, 
+                {merge: true}
+            );
+        } catch(err) {
+            console.log("There was an error saving your information", err);
+        }
+    }
+
+    async function addAndSaveClass() {
+        addClass();
+        await saveClass();
+        createNewClass();
+    }
+
+    async function createNewClass() {
+        newClass = !newClass;
         currClass = {
             courseId: '',
             courseDescription: '',
@@ -64,41 +108,87 @@
         };
     }
 
-    async function createNewClass() {
-        newClass = !newClass;
+    function filterClasses(index) {
+        let newListOfClasses = listOfClasses.filter((val, i) => {
+            console.log(i, index, i !== index);
+            return i !== index;
+        });
+        return newListOfClasses;
     }
 
-    function editCourse() {
-        return ;
+    function editClass(index) {
+        let filteredClasses = filterClasses(index);
+        currClass = listOfClasses[index];
+        listOfClasses = filteredClasses;
+        newClass = !newClass; // createNewClass()
     }
 
-    function removeCourse() {
-        return ;
+    async function cancelEditClass() {
+        try {
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            const userDoc = await getDoc(userRef);
+
+            if (userDoc.exists()) {
+                listOfClasses = userDoc.data().classes || [];
+            }
+            createNewClass();
+        } catch (err) {
+            console.log("There was an error in cancelling editing", err);
+        }
     }
+
+    async function removeClass(index) {
+        try {
+            let filteredClasses = filterClasses(index);
+            const userRef = doc(db, 'users', $authStore.user.uid);
+            listOfClasses = filteredClasses;
+
+            await setDoc(
+                userRef, 
+                {
+                    classes: listOfClasses,
+                }, 
+                {merge: true}
+            );
+        } catch(err) {
+            console.log("There was an error removing your information", err)
+        }
+    }
+
+    async function viewClass(index) {
+        console.log(index);
+        classAssignments = [];
+        for (let i = 0; i < assignmentList.length; i++) {
+            if (assignmentList[i].courseId === listOfClasses[index].courseId) {
+                classAssignments = [...classAssignments, {assignment: assignmentList[i], index: index}];
+            }
+        }
+        console.log(classAssignments);
+        listClassAssignments = !listClassAssignments;
+    }    
 </script>
-
 
 {#if !authStore.loading}
     <div class="mainContainer">    
         <div class="headerContainer">
             <div class="headerBtns">
                 {#if newClass}
-                <h1>New Class</h1>
-                <button on:click={createNewClass}>
-                    <i class="fa-regular fa-newspaper" />
-                    <p>Classes</p>
-                </button>
+                    <h1>New Class</h1>
+                    <button on:click={cancelEditClass}>
+                        <i class="fa-regular fa-newspaper" />
+                        <p>Cancel</p>
+                    </button>
+                    <button on:click={addAndSaveClass}>
+                        <i class="fa-regular fa-floppy-disk" />
+                        <p>Save</p>
+                    </button>
                 {:else}
-                <h1>Classes</h1>
-                <button on:click={createNewClass}>
-                    <i class="fa-regular fa-newspaper" />
-                    <p>New Class</p>
-                </button>
+                    <h1>Classes</h1>
+                    <button on:click={createNewClass}>
+                        <i class="fa-regular fa-newspaper" />
+                        <p>New Class</p>
+                    </button>
                 {/if}
-                <button>
-                    <i class="fa-regular fa-floppy-disk" />
-                    <p>Save</p>
-                </button>
             </div>
         </div>
         
@@ -112,8 +202,8 @@
                 </div>
                 <div class={"enterClass " + (error ? "errorBorder" : "")}>
                     <select bind:value={currClass.category} class="select-progress">
-                        <option value="Period 1">Core course</option>
-                        <option value="Period 2">Elective course</option>
+                        <option value="Core course">Core course</option>
+                        <option value="Elective course">Elective course</option>
                     </select>
                 </div>
                 <div class={"enterClass " + (error ? "errorBorder" : "")}>
@@ -128,7 +218,7 @@
                     </div>
                 </div>
                 <div class={"enterClass " + (error ? "errorBorder" : "")}>
-                    <select bind:value={currClass.progress} class="select-progress">
+                    <select bind:value={currClass.period} class="select-progress">
                         <option value="Semester 1">Semester 1</option>
                         <option value="Semester 2">Semester 2</option>
                         <option value="Semester 3">Semester 3</option>
@@ -140,7 +230,6 @@
                     </select>
                 </div>
             </div>
-            <!-- <button on:click={addAndSaveAssignment} class="confirm">ADD</button> -->
         {:else}
             <main>
                 {#if listOfClasses}
@@ -148,9 +237,16 @@
                         <p>There is no classes!</p>
                     {/if}
                     {#each listOfClasses as course, index}
-                        <ClassItem {course} {index} {removeCourse} {editCourse} />
+                        <ClassItem {course} {index} {removeClass} {editClass} {viewClass} />
                     {/each}
                 {/if}
+
+                {#if classAssignments.length === 0} 
+                    <p></p>
+                {/if}
+                <!-- {#each classAssignments as {assignment, index}}
+                    <AssignmentItem {assignment} {index} {removeAssignment} {editAssignment} />
+                {/each} -->
             </main>
         {/if}
     </div>
