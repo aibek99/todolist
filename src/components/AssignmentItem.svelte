@@ -23,10 +23,10 @@
             <p class="label">Course ID</p>
             <p class="value">{assignment.courseId}</p>
         </div>
-        <div class="column">
+        <!-- <div class="column">
             <p class="label">Course Name</p>
             <p class="value">{assignment.courseName}</p>
-        </div>
+        </div> -->
         <div class="column">
             <p class="label">Due Date</p>
             <p class="value">{assignment.dueDate}</p>
@@ -43,10 +43,10 @@
             <p class="label">Completed</p>
             <p class="value">{assignment.completed ? 'Yes' : 'No'}</p>
         </div>
-        <div class="column">
+        <!-- <div class="column">
             <p class="label">Course Logo</p>
             <p class="value">{assignment.courseLogo}</p>
-        </div>
+        </div> -->
         <div class="actions">
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <i 
