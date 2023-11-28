@@ -1,8 +1,9 @@
 <script>
     export let course;
     export let index;
-    export let editCourse;
-    export let removeCourse;
+    export let editClass;
+    export let removeClass;
+    export let viewClass;
 </script>
 
 <div class="course-container">
@@ -33,17 +34,25 @@
         </div>
         <div class="actions">
             <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <i
+                on:click={() => { 
+                    viewClass(index);
+                }} 
+                on:keydown={() => {}}  
+                class="fa-solid fa-list" 
+            />
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <i 
                 on:click={() => { 
-                    editCourse(index);
-                }} 
+                    editClass(index);
+                }}
                 on:keydown={() => {}} 
                 class="fa-solid fa-pen-to-square"
             />
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <i
                 on:click={() => { 
-                    removeCourse(index);
+                    removeClass(index);
                 }} 
                 on:keydown={() => {}}  
                 class="fa-regular fa-trash-can" 
