@@ -22,11 +22,9 @@ jobs:
 
       - name: Install ESLint and Prettier
         run: |
-          npm install eslint@8.10.0
-          npm install prettier
-          npm install eslint-plugin-prettier
-          npm install @typescript-eslint/eslint-plugin
-          npm install @typescript-eslint/parser
+          npm install eslint@8.10.0 --force
+          npm install prettier@3.0.0
+          npm install eslint-plugin-prettier@latest
 
       - name: Run ESLint with Prettier formatter
         run: |
