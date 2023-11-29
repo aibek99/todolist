@@ -34,13 +34,13 @@
 		</div>
 		<div class="actions">
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<i
+			<!-- <i
 				on:click={() => {
 					viewClass(index);
 				}}
 				on:keydown={() => {}}
 				class="fa-solid fa-list"
-			/>
+			/> -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<i
 				on:click={() => {
