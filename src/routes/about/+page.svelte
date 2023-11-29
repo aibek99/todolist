@@ -14,17 +14,17 @@
 			navigate through your data. Whether you want to view your classes or assignments, update your
 			class or assignment, Assignment website features several pages to help you manage your
 			schedule. The homepage provides a quick overview of your schedule, while the about page offers
-			more information about this project and how>
+			more information about this project and how
 		</p>
 		<p>
 			I used the latest technologies to implement this project, including SvelteKit with TypeScript,
 			ESLint, and Prettier for the frontend, and ***** for the backend. This ensures that website is
-			not only user->
+			not only user
 		</p>
 		<p>
 			In conclusion, Assignment tool is designed to make it easy for you to manage your assignments.
 			With simple CMS, you can keep track of your assignments, update your schedule, and manage your
-			assignments with eas>
+			assignments with ease
 		</p>
 	</div>
 </body>
