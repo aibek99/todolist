@@ -71,6 +71,8 @@
 			}
 
 			if (!validateDaysLeft(currAssignment.daysLeft)) {
+				alert('Invalid value for days left field.');
+				return;
 			}
 
 			// if (!validateURL(currAssignment.courseLogo)) {
