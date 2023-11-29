@@ -70,6 +70,9 @@
 				return;
 			}
 
+			if (!validateDaysLeft(currAssignment.daysLeft)) {
+			}
+
 			// if (!validateURL(currAssignment.courseLogo)) {
 			//     alert("Invalid URL format for Course Logo.");
 			//     return;
@@ -187,6 +190,10 @@
 
 	function validateText(value) {
 		return value && value.trim().length > 0;
+	}
+
+	function validateDaysLeft(value) {
+		return Number.isInteger(value) && value > 0;
 	}
 
 	function validateDate(value) {
