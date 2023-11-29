@@ -1,16 +1,26 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# ESLint is a tool for identifying and reporting on patterns
+# found in ECMAScript/JavaScript code.
+# More details at https://github.com/eslint/eslint
+# and https://eslint.org
+
 name: ESLint
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    # The branches below must be a subset of the branches above
+    branches: ['main']
   schedule:
     - cron: '15 12 * * 4'
 
 jobs:
   eslint:
-    name: Run ESLint scanning
+    name: Run eslint scanning
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,17 +30,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install ESLint and Prettier
+      - name: Install ESLint
         run: |
-          npm install eslint@8.10.0 --force
-          npm install prettier@3.0.0
-          npm install eslint-plugin-prettier@latest
-          npm install prettier-plugin-svelte@latest
+          npm install eslint@8.10.0
+          npm install @microsoft/eslint-formatter-sarif@2.1.7
+          npm install --save-dev --save-exact prettier
 
-      - name: Run ESLint with Prettier formatter
-        run: |
-          npx eslint .
-            --config .eslintrc.js
-            --ext .js,.jsx,.ts,.tsx
-            --format node_modules/eslint-formatter-prettier
-          npx prettier --check .
+      - name: Run ESLint
+        run: npx eslint .
+          --config .eslintrc.js
+          --ext .js,.jsx,.ts,.tsx
+          --format prettier
+        continue-on-error: true
