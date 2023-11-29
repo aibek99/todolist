@@ -43,6 +43,7 @@ jobs:
         continue-on-error: true
 
   Deploy-Production:
+    needs: eslint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
