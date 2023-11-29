@@ -15,8 +15,8 @@
 		</p>
 		<p>
 			In conclusion, Assignment tool is designed to make it easy for you to manage your assignments.
-			With simple CMS, you can keep track of your assignments, update your schedule, and manage your
-			assignments with ease
+			With simple CMS, you can keep track of your assignments, update your progress on them, and
+			manage your assignments with ease.
 		</p>
 	</div>
 </body>
