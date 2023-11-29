@@ -195,7 +195,7 @@
 	}
 
 	function validateDaysLeft(value) {
-		return Number.isInteger(value) && value > 0;
+		return typeof value === 'number' && value > 0;
 	}
 
 	function validateDate(value) {
