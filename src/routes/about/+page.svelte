@@ -11,7 +11,8 @@
 
 		<p>
 			I used the latest technologies to implement this project, including SvelteKit with Javascript,
-			ESLint, and Prettier for the frontend, and firebase for the backend.
+			ESLint, and Prettier for the frontend, and firebase for the backend. Added CI/CD pipeline for
+			continuous integration and continuous deployment.
 		</p>
 		<p>
 			In conclusion, Assignment tool is designed to make it easy for you to manage your assignments.
