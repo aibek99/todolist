@@ -195,7 +195,14 @@
 	}
 
 	function validateDaysLeft(value) {
-		return typeof value === 'number' && value > 0;
+		let tmpValue = value.trim();
+		let flag = true;
+		for (let i = 0; i < tmpValue.length; i++) {
+			if (!('0' <= tmpValue[i] && tmpValue[i] <= '9')) {
+				flag = false;
+			}
+		}
+		return typeof value === 'string' && flag;
 	}
 
 	function validateDate(value) {
