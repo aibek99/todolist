@@ -4,7 +4,6 @@
 	<h2>Features</h2>
 	<ul>
 		<li>Create an account</li>
-		<li>Edit your account information</li>
 		<li>Create a class</li>
 		<li>Read a class</li>
 		<li>Update a class</li>
@@ -15,7 +14,6 @@
 		<li>Delete assignment</li>
 		<li>Track your current classes</li>
 		<li>Track your current assignments</li>
-		<li>Sort and filter your assignments</li>
 	</ul>
 </body>
 
