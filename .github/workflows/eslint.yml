@@ -25,6 +25,7 @@ jobs:
           npm install eslint@8.10.0 --force
           npm install prettier@3.0.0
           npm install eslint-plugin-prettier@latest
+          npm install prettier-plugin-svelte@latest
 
       - name: Run ESLint with Prettier formatter
         run: |
